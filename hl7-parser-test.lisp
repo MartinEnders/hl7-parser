@@ -7,6 +7,6 @@
     (with-open-file (out out-file :direction :output :external-format external-format :if-does-not-exist :create :if-exists :supersede)
       (loop for x = (read-line in nil nil)
 	 while x
- 	 do (format out "~A" (car (encode (decode (format nil "~A~c" x #\Newline)) output-delimiters)))))))
+ 	 do (format out "~A" (car (encode (decode x) :delimiter output-delimiters)))))))
 				
   

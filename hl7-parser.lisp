@@ -11,9 +11,9 @@
 	(mapcar #'parse-2 (lexer s)))
       (mapcar #'parse-2 (lexer string-or-stream))))
 
-(defun encode (message-list &optional (delimiter "|^~\\&"))
+(defun encode (message-list &key (delimiter "|^~\\&") (message-delimiter t))
   "Requires list of Messages, Returns list of HL7-Messages in Strings"
-  (hl7-writer message-list delimiter))
+  (hl7-writer message-list :delimiter-string delimiter :message-delimiter message-delimiter))
       
 
 
@@ -47,7 +47,7 @@
 		    until (eq x :message)
 		    finally (if (eq x :message)
 				(return result)
-				(return (append result '(:message)))))))))
+				(return (append result '(nil :message)))))))))
 	    
 
 
@@ -129,16 +129,16 @@
 (defun logging (&rest rest)
   (declare (ignore rest))
   (values))
-;  (apply #'format rest)
+;  (apply #'format rest))
 
 
 (defun parse-2 (tokens)
   (let ((operand-stack nil)
 	(operator-stack nil))
     (dolist (x tokens)
-      (logging t "~A~%~A~%----~%" operand-stack operator-stack)
+      (logging t "Operand-stack:~%~S~%Operator-stack~%~S~%Token~%~S~%----~%" operand-stack operator-stack x)
       
-      (cond ((or (stringp x) (numberp x))
+      (cond ((or (stringp x) (numberp x) (null x))
 	     (push x operand-stack))
 	    ((symbolp x)
 	     (loop while (operand>= x (car operator-stack) )
@@ -146,33 +146,36 @@
 		    (let ((a  (pop operand-stack))
 			  (b  (pop operand-stack))
 			  (op (pop operator-stack)))
-		      (logging t "    ~A,~A,~A~%" a b op)
+		      (logging t "    A:~S,~%    B:~S,~%    OP:~S~%" a b op)
 
 		      (cond ((and (listp b) (eq (car b) op))
-			     (push (append (list op)  (cdr b) (list a) ) operand-stack))
+			     (logging t "1.1~%")
+			     (push (append (list op)  (cdr b) (if a (list a) a) ) operand-stack)) ;;if a=nil don't append
 			    ((and (listp a) (eq (car a) op))
-			     (push (append (list op) (list b) (cdr a) ) operand-stack))
+			     (logging t "1.2~%")
+			     (push (append (list op) (if b (list b) b) (cdr a) ) operand-stack))
 			    (t
+			     (logging t "1.3~%")
 			     (push (list op b a) operand-stack)))))
 
 		     
 	     (push x operator-stack))))
 
     (logging t " ------ Aufraeumen ---------- ~%")
-    (logging t "~A~%~A~%----~%" operand-stack operator-stack)
+    (logging t "~S~%~S~%----~%" operand-stack operator-stack)
     
     (dolist (x operator-stack)
-      (logging t "~A~%~A~%----~%" operand-stack operator-stack)
+      (logging t "Operand-Stack:~%~S~%Operator-Stack:~%~S~%----~%" operand-stack operator-stack)
       (let ((a  (pop operand-stack))
 	    (b  (pop operand-stack))
 	    (op x))
-	(logging t "    A: ~A,B: ~A,OP: ~A~%" a b op)
+	(logging t "    A: ~S,~%    B: ~S,~%    OP: ~S~%" a b op)
 	(cond ((and (listp b) (eq (car b) op))
 	       (logging t "1~%")
-	       (push (append (list op) (cdr b) (list a) ) operand-stack))
+	       (push (append (list op) (cdr b) (if a (list a) a) ) operand-stack))
 	      ((and (listp a) (eq (car a) op))
 	       (logging t "2~%")
-	       (push (append (list op) (list b) (cdr a) ) operand-stack))
+	       (push (append (list op) (if b (list b) b) (cdr a) ) operand-stack))
 	      (t
 	       (logging t "3~%")
 	       (if b
@@ -190,7 +193,7 @@
 ;;   \ V  V /| |  | | ||  __/ |   
 ;;    \_/\_/ |_|  |_|\__\___|_|   
                                
-(defun hl7-writer (hl7-messages &optional (delimiter-string "|^~\\&"))
+(defun hl7-writer (hl7-messages &key (delimiter-string "|^~\\&") (message-delimiter t))
   (let ((delimiter `(,(cons :field            (char delimiter-string 0))
 		      ,(cons :component       (char delimiter-string 1))
 		      ,(cons :repetition      (char delimiter-string 2))
@@ -198,7 +201,11 @@
 		      ,(cons :segment         #\Return)           
 		      ,(cons :message         #\Newline))))
     (loop for x in hl7-messages
-	 collect (format nil "~A~c" (correct-msh (hl7-output x delimiter) delimiter-string) (cdr (assoc :message delimiter :test #'eq))))))
+       collect (concatenate 'string
+			    (correct-msh (hl7-output x delimiter) delimiter-string)
+			    (if message-delimiter
+				(format nil "~c" (cdr (assoc :message delimiter :test #'eq)))
+				"")))))
 
 (defun correct-msh (string delimiter-string)
   (if (and (> (length string) 3)
@@ -215,9 +222,8 @@
 				   "~~" ;; escape for format sequence
 				   (format nil "~c" delimiter-char))))
 
-
 	
-	(format nil (concatenate 'string "~{~A~^" delimiter-string "~}")
+	(format nil (concatenate 'string "~{~A~^" delimiter-string "~}" (if (eq typ :segment) delimiter-string "")) 
 		(loop for x in (cdr message)
 		   collect (format nil "~A" (hl7-output x delimiter)))))
 

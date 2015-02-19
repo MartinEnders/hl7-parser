@@ -12,9 +12,12 @@ SBCL on Debian GNU/Linux
 decode: Accepts a String or a Stream containing HL7-Messages
 
 ```cl
-(defun encode (message-list &optional (delimiter "|^~\\&"))
+(defun encode (message-list &key (delimiter "|^~\\&") (message-delimiter t))
 ```
-encode: Accepts a List of decoded HL7-Messages and optional you can set delimiters for encoding
+encode:
+ * `message-list` List of decoded HL7-Messages
+ * `delimiter` for encoding of Message
+ * `message-delimiter` if true then the encoded Messages ends with a `#\Newline` if nil then no `#\Newline` is appended.
 
 
 ```cl
