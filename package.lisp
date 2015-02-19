@@ -1,9 +1,12 @@
 ;;;; package.lisp
 
-(defpackage #:hl7-parser
+(defpackage :hl7-parser
   (:use #:cl)
-  (:export parse-message parse-messages))
+  (:export decode encode))
 
-(defpackage #:hl7-fast-parser
-  (:use #:cl)
-  (:export parse))
+
+(defpackage :hl7-parser-test
+  (:use #:cl #:hl7-parser)
+  (:export test-parser))
+
+

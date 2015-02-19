@@ -7,5 +7,5 @@
   :license "Specify license here"
   :components ((:file "package")
                (:file "hl7-parser")
-	       (:file "hl7-fast-parser")))
+	       (:file "hl7-parser-test")))
 
