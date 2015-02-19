@@ -42,9 +42,12 @@
 		 (loop for last = nil then x
 		    for x = (get-next-token stream delimiter)
 		    while x
-		    when (and last (symbolp last) (symbolp x)) collect ""
-		    collect x
-		    until (eq x :message))))))
+		    when (and last (symbolp last) (symbolp x)) collect "" into result
+		    collect x into result
+		    until (eq x :message)
+		    finally (if (eq x :message)
+				(return result)
+				(return (append result '(:message)))))))))
 	    
 
 
