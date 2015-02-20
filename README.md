@@ -12,12 +12,12 @@ SBCL on Debian GNU/Linux
 decode: Accepts a String or a Stream containing HL7-Messages
 
 ```cl
-(defun encode (message-list &key (delimiter "|^~\\&") (message-delimiter t))
+(defun encode (message-list &key (delimiter "|^~\\&") (message-delimiter nil))
 ```
 encode:
  * `message-list` List of decoded HL7-Messages
  * `delimiter` for encoding of Message
- * `message-delimiter` if true then the encoded Messages ends with a `#\Newline` if nil then no `#\Newline` is appended.
+ * `message-delimiter` if true then the encoded Messages ends with a `#\Newline` if nil then no `#\Newline` is appended (default nil).
 
 
 ```cl
@@ -29,22 +29,26 @@ Use `diff in-file out-file` to check if the encode and decode of the messages wo
 
 ## Example (need to be updated - due to change in delimiter-handling)
 ```cl
-CL-USER>  (hl7-parser:decode (format nil "MSH|^~~\\&|test|test^test|~cEVN||123~c~c" #\Return #\Return #\Newline ))
+CL-USER> (hl7-parser:decode (format nil "MSH|^~~\\&|test|test^test|~cEVN||123~c~c" #\Return #\Return #\Newline ))
 ((:MESSAGE
   (:SEGMENT (:FIELD "MSH" "|^~\\&" "test" (:COMPONENT "test" "test") "")
    (:FIELD "EVN" "" "123") "")))
+
 CL-USER> (hl7-parser:encode (hl7-parser:decode (format nil "MSH|^~~\\&|test|test^test|~cEVN||123~c~c" #\Return #\Return #\Newline )))
-("MSH|^~\\&|test|test^test|EVN||123
-")
+("MSH|^~\\&|test|test^test|^MEVN||123^M") ; ^M -> #\Return
+
+CL-USER> (hl7-parser:encode (hl7-parser:decode (format nil "MSH|^~~\\&|test|test^test|~cEVN||123~c~c" #\Return #\Return #\Newline )) :message-delimiter t)
+("MSH|^~\\&|test|test^test|^MEVN||123^M
+") ; ^M -> #\Return
 ```
 
 How to set Delimiters for encoding:
 ```cl
 CL-USER> (hl7-parser:decode (format nil "MSH#^~~\\&#test#test^test#~c" #\Newline ))
 ((:MESSAGE (:FIELD "MSH" "#^~\\&" "test" (:COMPONENT "test" "test") "")))
-CL-USER> (hl7-parser:encode (hl7-parser:decode (format nil "MSH|^~~\\&|test|test^test|~c" #\Newline )) "#^~\\&")
-("MSH#^~\\&#test#test^test#
-")
+
+CL-USER> (hl7-parser:encode (hl7-parser:decode (format nil "MSH|^~~\\&|test|test^test|~c" #\Newline )) :delimiter "#^~\\&")
+("MSH#^~\\&#test#test^test#")
 ```
 
 Pay attention to the character escaping (~ in format directive and backslashes)

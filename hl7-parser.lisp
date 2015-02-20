@@ -11,7 +11,7 @@
 	(mapcar #'parse-2 (lexer s)))
       (mapcar #'parse-2 (lexer string-or-stream))))
 
-(defun encode (message-list &key (delimiter "|^~\\&") (message-delimiter t))
+(defun encode (message-list &key (delimiter "|^~\\&") (message-delimiter nil))
   "Requires list of Messages, Returns list of HL7-Messages in Strings"
   (hl7-writer message-list :delimiter-string delimiter :message-delimiter message-delimiter))
       
@@ -42,7 +42,7 @@
 		 (loop for last = nil then x
 		    for x = (get-next-token stream delimiter)
 		    while x
-		    when (and last (symbolp last) (symbolp x)) collect "" into result
+		    when (and last (symbolp last) (symbolp x)) collect (if (and (eq last :segment) (eq x :message)) nil "") into result
 		    collect x into result
 		    until (eq x :message)
 		    finally (if (eq x :message)
@@ -94,7 +94,7 @@
 	 (number-of-read-characters (read-sequence result stream :start 0 :end number-of-characters)))
     (if (= number-of-read-characters number-of-characters)
 	result
-	nil)))
+	(error "Stream not long enough. String: ~A Number of Requested Characters: ~A~%" result number-of-characters))))
 
 
 
@@ -156,7 +156,7 @@
 			     (push (append (list op) (if b (list b) b) (cdr a) ) operand-stack))
 			    (t
 			     (logging t "1.3~%")
-			     (push (list op b a) operand-stack)))))
+			     (push (append (list op) (if b (list b) b) (if a (list a) a)) operand-stack)))))
 
 		     
 	     (push x operator-stack))))
@@ -178,9 +178,7 @@
 	       (push (append (list op) (if b (list b) b) (cdr a) ) operand-stack))
 	      (t
 	       (logging t "3~%")
-	       (if b
-		   (push (list op b a) operand-stack)
-		   (push (list op a)   operand-stack))))))
+	       (push (append (list op) (if b (list b) b) (if a (list a) a)) operand-stack)))))
     
     (car operand-stack)))
 
@@ -193,7 +191,7 @@
 ;;   \ V  V /| |  | | ||  __/ |   
 ;;    \_/\_/ |_|  |_|\__\___|_|   
                                
-(defun hl7-writer (hl7-messages &key (delimiter-string "|^~\\&") (message-delimiter t))
+(defun hl7-writer (hl7-messages &key (delimiter-string "|^~\\&") (message-delimiter nil))
   (let ((delimiter `(,(cons :field            (char delimiter-string 0))
 		      ,(cons :component       (char delimiter-string 1))
 		      ,(cons :repetition      (char delimiter-string 2))
