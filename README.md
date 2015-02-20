@@ -6,7 +6,7 @@ HL7-Parser (decode / encode) for Common Lisp
 http://opensource.org/licenses/BSD-3-Clause
 
 ## Implementation
-SBCL on Debian GNU/Linux
+SBCL and CCL on Debian GNU/Linux
 
 ## Usage
 ```cl

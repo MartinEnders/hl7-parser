@@ -30,9 +30,9 @@
 
 (asdf:defsystem #:hl7-parser
   :serial t
-  :description "Describe hl7-parser here"
-  :author "Martin R. Enders"
-  :license ""
+  :description "Decoder and Encoder for ER7 formatted HL7-Messages"
+  :author "Martin R. Enders <martin@martin-enders.de>"
+  :license "BSD"
   :components ((:file "package")
                (:file "hl7-parser")
 	       (:file "hl7-parser-test")))
