@@ -27,7 +27,7 @@ test-parser: Read `in-file` (with HL7-messages) decode every line and then encod
 
 Use `diff in-file out-file` to check if the encode and decode of the messages work.
 
-## Example (need to be updated - due to change in delimiter-handling)
+## Example
 ```cl
 CL-USER> (hl7-parser:decode (format nil "MSH|^~~\\&|test|test^test|~cEVN||123~c~c" #\Return #\Return #\Newline ))
 ((:MESSAGE
