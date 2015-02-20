@@ -1,6 +1,13 @@
 # Common Lisp HL7-Parser
 
-HL7-Parser (decode / encode) for Common Lisp
+HL7-Parser for HL7 Version 2 Messages (decode / encode) for Common Lisp.
+
+> The HL7 Version 2 Messaging Standard — Application Protocol for Electronic
+> Data Exchange in Healthcare Environments — is considered to be the workhorse
+> of data exchange in healthcare and is the most widely implemented standard
+> for healthcare information in the world.
+
+Source: http://www.hl7.org/about/FAQs/index.cfm?ref=nav ("General HL7 FAQ" > "Version 2" > "What is Version 2?")
 
 ## License
 http://opensource.org/licenses/BSD-3-Clause
