@@ -15,6 +15,14 @@ http://opensource.org/licenses/BSD-3-Clause
 ## Implementation
 SBCL and CCL on Debian GNU/Linux
 
+## Installation
+
+HL7-Parser is 'quickloadable':
+
+```cl
+(ql:quickload "hl7-parser")
+```
+
 ## Usage
 ```cl
 (defun decode (string-or-stream)
