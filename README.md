@@ -27,13 +27,16 @@ HL7-Parser is 'quickloadable':
 ```cl
 (defun decode (string-or-stream)
 ```
+
+hl7-parser:decode
+
  * decode: Accepts a String or a Stream containing HL7-Messages
  * returns a list of parsed messages.
 
 ```cl
 (defun encode (message-list &key (delimiter "|^~\\&") (message-delimiter nil))
 ```
-encode:
+hl7-parser:encode
  * `message-list` List of decoded HL7-Messages
  * `delimiter` for encoding of Message
  * `message-delimiter` if true then the encoded Messages ends with a `#\Newline` if nil then no `#\Newline` is appended (default nil).
@@ -44,7 +47,7 @@ encode:
 ```cl
 (defun test-parser (in-file out-file &key (external-format :iso-8859-1) (output-delimiters "|^~\\&"))
 ```
-test-parser:
+hl7-test:test-parser
  * Read `in-file` (with HL7-messages) decode every line and then encode it and write it to `out-file`.
  * Use `diff in-file out-file` to check if the encode and decode of the messages work.
  * returns always `NIL`
