@@ -189,7 +189,7 @@
 		     
 	     (push x operator-stack))))
 
-    (logging t " ------ Aufraeumen ---------- ~%")
+    (logging t " ------ Clean up ---------- ~%")
     (logging t "~S~%~S~%----~%" operand-stack operator-stack)
     
     (dolist (x operator-stack)
