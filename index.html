@@ -31,7 +31,7 @@
       </header>
       <section>
         <h1>
-<a id="common-lisp-hl7-parser" class="anchor" href="#common-lisp-hl7-parser" aria-hidden="true"><span class="octicon octicon-link"></span></a>Common Lisp HL7-Parser</h1>
+<a id="common-lisp-hl7-parser" class="anchor" href="#common-lisp-hl7-parser" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Common Lisp HL7-Parser</h1>
 
 <p>HL7-Parser for HL7 Version 2 Messages (decode / encode) for Common Lisp.</p>
 
@@ -45,24 +45,24 @@ for healthcare information in the world.</p>
 <p>Source: <a href="http://www.hl7.org/about/FAQs/index.cfm?ref=nav">http://www.hl7.org/about/FAQs/index.cfm?ref=nav</a> ("General HL7 FAQ" &gt; "Version 2" &gt; "What is Version 2?")</p>
 
 <h2>
-<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
 
 <p><a href="http://opensource.org/licenses/BSD-3-Clause">http://opensource.org/licenses/BSD-3-Clause</a></p>
 
 <h2>
-<a id="implementation" class="anchor" href="#implementation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Implementation</h2>
+<a id="implementation" class="anchor" href="#implementation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Implementation</h2>
 
 <p>SBCL and CCL on Debian GNU/Linux</p>
 
 <h2>
-<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h2>
 
 <p>HL7-Parser is 'quickloadable':</p>
 
 <div class="highlight highlight-source-lisp"><pre>(ql:quickload <span class="pl-s"><span class="pl-pds">"</span>hl7-parser<span class="pl-pds">"</span></span>)</pre></div>
 
 <h2>
-<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
 
 <div class="highlight highlight-source-lisp"><pre>(<span class="pl-k">defun</span> <span class="pl-en">decode</span> (string-<span class="pl-k">or</span>-stream)</pre></div>
 
@@ -99,14 +99,48 @@ for healthcare information in the world.</p>
 </ul>
 
 <h2>
-<a id="exeptionhandling-and-validation" class="anchor" href="#exeptionhandling-and-validation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Exeptionhandling and validation</h2>
+<a id="exeptionhandling-and-validation" class="anchor" href="#exeptionhandling-and-validation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Exeptionhandling and validation</h2>
 
 <p>Every String or Stream with at least eight Characters is parsed in a more or less reasonable way.</p>
 
 <p>There are no syntax or HL7-Structure checking mechanisms.</p>
 
 <h2>
-<a id="example" class="anchor" href="#example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example</h2>
+<a id="escaping" class="anchor" href="#escaping" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Escaping</h2>
+
+<p>The HL7-Escaping works like in the most programming languages but in this case this is the wrong way.</p>
+
+<p>The following escape sequences are defined in the HL7 2.5 Standard in Chapter 2.7.1:</p>
+
+<pre><code>\H\        start highlighting
+\N\        normal text (end highlighting)
+\F\        field separator
+\S\        component separator
+\T\        subcomponent separator
+\R\        repetition separator
+\E\        escape character
+\Xdddd...\ hexadecimal data
+\Zdddd...\ locally defined escape sequence
+</code></pre>
+
+<p>These escape sequences are not recognized correctly by the parser:</p>
+
+<div class="highlight highlight-source-lisp"><pre>CL-USER&gt; (hl7-parser:decode (<span class="pl-c1">format</span> <span class="pl-c1">nil</span> <span class="pl-s"><span class="pl-pds">"</span>MSH|^~~<span class="pl-cce">\\</span>&amp;|test|te<span class="pl-cce">\\</span>F<span class="pl-cce">\\</span>st^test|~cEVN||123~c~c<span class="pl-pds">"</span></span> <span class="pl-c1">#\Return</span> <span class="pl-c1">#\Return</span> <span class="pl-c1">#\Newline</span> ))
+<span class="pl-c">;; Evaluates to:</span>
+((:MESSAGE
+  (:SEGMENT (:FIELD <span class="pl-s"><span class="pl-pds">"</span>MSH<span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span>|^~<span class="pl-cce">\\</span>&amp;<span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span>test<span class="pl-pds">"</span></span> (:COMPONENT <span class="pl-s"><span class="pl-pds">"</span>te<span class="pl-cce">\\</span>F<span class="pl-cce">\\</span>st<span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span>test<span class="pl-pds">"</span></span>) <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>)
+   (:FIELD <span class="pl-s"><span class="pl-pds">"</span>EVN<span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span>123<span class="pl-pds">"</span></span>))))
+<span class="pl-c">;; Should evaluate to:</span>
+((:MESSAGE
+  (:SEGMENT (:FIELD <span class="pl-s"><span class="pl-pds">"</span>MSH<span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span>|^~<span class="pl-cce">\\</span>&amp;<span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span>test<span class="pl-pds">"</span></span> (:COMPONENT <span class="pl-s"><span class="pl-pds">"</span>te|st<span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span>test<span class="pl-pds">"</span></span>) <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>)
+   (:FIELD <span class="pl-s"><span class="pl-pds">"</span>EVN<span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span>123<span class="pl-pds">"</span></span>))))</pre></div>
+
+<p>The double-backslashes are needed because they are used within a string.</p>
+
+<p>Issue: <a href="https://github.com/MartinEnders/hl7-parser/issues/1">https://github.com/MartinEnders/hl7-parser/issues/1</a></p>
+
+<h2>
+<a id="example" class="anchor" href="#example" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Example</h2>
 
 <div class="highlight highlight-source-lisp"><pre>CL-USER&gt; (hl7-parser:decode (<span class="pl-c1">format</span> <span class="pl-c1">nil</span> <span class="pl-s"><span class="pl-pds">"</span>MSH|^~~<span class="pl-cce">\\</span>&amp;|test|test^test|~cEVN||123~c~c<span class="pl-pds">"</span></span> <span class="pl-c1">#\Return</span> <span class="pl-c1">#\Return</span> <span class="pl-c1">#\Newline</span> ))
 ((:MESSAGE
