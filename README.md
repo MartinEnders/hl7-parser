@@ -57,7 +57,38 @@ Every String or Stream with at least eight Characters is parsed in a more or les
 
 There are no syntax or HL7-Structure checking mechanisms.
 
+## Escaping
 
+The HL7-Escaping works like in the most programming languages but in this case this is the wrong way.
+
+The following escape sequences are defined in the HL7 2.5 Standard in Chapter 2.7.1:
+```
+\H\        start highlighting
+\N\        normal text (end highlighting)
+\F\        field separator
+\S\        component separator
+\T\        subcomponent separator
+\R\        repetition separator
+\E\        escape character
+\Xdddd...\ hexadecimal data
+\Zdddd...\ locally defined escape sequence
+```
+
+These escape sequences are not recognized correctly by the parser:
+```cl
+CL-USER> (hl7-parser:decode (format nil "MSH|^~~\\&|test|te\\F\\st^test|~cEVN||123~c~c" #\Return #\Return #\Newline ))
+;; Evaluates to:
+((:MESSAGE
+  (:SEGMENT (:FIELD "MSH" "|^~\\&" "test" (:COMPONENT "te\\F\\st" "test") "")
+   (:FIELD "EVN" "" "123"))))
+;; Should evaluate to:
+((:MESSAGE
+  (:SEGMENT (:FIELD "MSH" "|^~\\&" "test" (:COMPONENT "te|st" "test") "")
+   (:FIELD "EVN" "" "123"))))
+```
+The double-backslashes are needed because they are used within a string.
+
+Issue: https://github.com/MartinEnders/hl7-parser/issues/1
 
 ## Example
 ```cl
